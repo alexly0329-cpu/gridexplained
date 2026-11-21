@@ -1,0 +1,59 @@
+/* ---------- scene ---------- */
+.scene .o{stroke:var(--obj-edge);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.scene .thin{stroke:var(--obj-edge);stroke-width:1.4;fill:none;stroke-linecap:round}
+.scene .ln{stroke:var(--obj-edge);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.scene .gridl{stroke:var(--grid-line);stroke-width:1;fill:none}
+.scene text{font-family:var(--mono);fill:var(--ink)}
+.el{transition:opacity .4s,filter .4s,transform .5s cubic-bezier(.2,.9,.3,1.25)}
+.el.ghost{opacity:.5}
+.el.hide{opacity:0!important;transform:translateY(-12px);pointer-events:none}
+.el.dim{filter:var(--dim)}
+.el.dim[data-id$=":l"]{opacity:0}
+.el.flowel.hide{transform:none}
+.pill rect{fill:var(--pill-bg);stroke:var(--obj-edge);stroke-width:2}
+.pill .shadow{fill:var(--obj-edge);stroke:none}
+.pill text{font-size:11.5px;font-weight:500;dominant-baseline:central}
+.pill use{stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chartcard rect.bg{fill:var(--pill-bg);stroke:var(--obj-edge);stroke-width:2}
+.chartcard text{font-size:9.5px;fill:var(--muted)}
+.chartcard text.ttl{font-size:9.5px;font-weight:700;letter-spacing:.08em;fill:var(--ink)}
+.chartcard .ax{stroke:var(--line-strong);stroke-width:1.2;fill:none}
+
+/* flows */
+.flow{--fc:#e8a33a}
+.flow .track{fill:none;stroke:var(--obj-edge);stroke-width:3;opacity:.55;stroke-linecap:round;stroke-linejoin:round}
+.flow.pipe .track{stroke-width:11;opacity:1}
+.flow.pipe .fill{fill:none;stroke:var(--pipe,#cfe4f6);stroke-width:6.5;stroke-linecap:round;stroke-linejoin:round}
+.flow .dash{fill:none;stroke:var(--fc);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:.1 14;opacity:0;transition:opacity .3s}
+.flow.pipe .dash{stroke:#fff;stroke-width:3.5;stroke-dasharray:6 12}
+.flow.on .dash{opacity:1;animation:march .8s linear infinite}
+.flow.slow.on .dash{animation-duration:1.6s}.flow.fast.on .dash{animation-duration:.45s}
+.flow.rev.on .dash{animation-direction:reverse}
+.flow.on .track{opacity:.9}
+@keyframes march{to{stroke-dashoffset:-28}}
+.k-dc,.k-electric,.k-hv{--fc:#e8a33a}.k-ac{--fc:#7c63d0}.k-light{--fc:#f1b83a}.k-water{--fc:#2f86ce;--pipe:#bfdcf5}
+.k-cash{--fc:#6f9a3c}.k-steam{--fc:#9aa3ad;--pipe:#e8e6e1}.k-heat{--fc:#d0683a;--pipe:#f6c9ae}.k-gas{--fc:#2a9d8f;--pipe:#c9ece6}.k-wind{--fc:#5b9bd5}
+.k-light .track,.k-wind .track{opacity:0}
+.k-wind.on .track,.k-light.on .track{opacity:.0}
+.k-light .dash{stroke-dasharray:3 16;stroke-width:4}
+.k-wind .dash{stroke-dasharray:14 22;stroke-width:3}
+
+/* motion */
+.spin{animation:spin var(--spin,6s) linear infinite;transform-origin:0 0}
+.spin.slow{animation-duration:30s}
+.scene.paused *{animation-play-state:paused!important}
+.rev-spin{animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bob{animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.rise{animation:rise 3s ease-in infinite;transform-box:fill-box;transform-origin:center}
+@keyframes rise{0%{transform:translateY(8px) scale(.6);opacity:0}25%{opacity:.9}100%{transform:translateY(-34px) scale(1.5);opacity:0}}
+.flicker{animation:flicker .5s steps(2) infinite}
+@keyframes flicker{50%{transform:scaleY(.86) scaleX(1.06)}}
+.wave{animation:wave 3.2s ease-in-out infinite}
+@keyframes wave{50%{transform:translateX(7px)}}
+.glow{animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{50%{opacity:.35}}
+.travel{animation:travel var(--t,3s) linear infinite}
+@keyframes travel{to{offset-distance:100%}}
+
