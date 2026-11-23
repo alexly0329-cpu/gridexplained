@@ -52,3 +52,16 @@ order, frequency and inertia, transmission losses, capacity vs energy, a whole-g
 ## Trader label
 
 Set `track: 'trader'` on a lesson to give it a TRADER badge in the menu and header and to include it in the menu's All / Core / Trader filter (stored in `localStorage` as `grid-filter`).
+
+## Menu, landing page and tab title
+
+- The menu opens on **Core**; the reader can switch to **Trader** or **All**. The choice is remembered (`grid-filter` in `localStorage`). Only one menu group is open at a time.
+- The Next button follows the filter, so Core readers skip Trader lessons.
+- `LANDING` in `js/main.js` sets the lesson shown when the page opens without a `#/lesson` link (currently `solar`).
+- The browser tab title is always “Grid Explained” (`TAB_TITLE`).
+- Trader group 08 also holds `capacity`, `ohio`, `excel` and `cases`; `js/lessons/buckets.js` computes hours per power block for a month.
+
+## Layout
+
+- On desktop (861 px wide and up) every lesson except the sandbox fills the window height (`.layout.fit` in `css/app.css`): diagram 65% and step card 35%, stats on top of the diagram, legend and playback controls laid over its bottom, stepper under it with every step title under its number, step card and Knowledge Check on the right.
+- At 860 px and below the page stacks into one column (phone layout). Below about 860 px the stepper shows numbers only.
