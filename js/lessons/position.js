@@ -1,8 +1,18 @@
-import { list, table, bars } from './cards.js';
+import { list, table, bars, cols } from './cards.js';
+import { bucketHours } from './buckets.js';
 
 // Trader track. General market knowledge, not from the course notes. Volumes and prices are illustrative; open volume, percent hedged and mark-to-market are computed.
 const BOOK = [['Jul', 50000, 40000], ['Aug', 52000, 39000], ['Sep', 41000, 34000], ['Oct', 38000, 36000]].map(([m, sold, bought]) => ({ m, sold, bought, open: sold - bought, pct: Math.round((bought / sold) * 100) }));
 const fmt = (n) => n.toLocaleString('en-US');
+// A yearly customer deal spread by a monthly load shape, then split into on-peak and off-peak hours for July 2026 (computed).
+const DEAL = 12000, SHAPE = [10, 9, 8, 7, 7, 8, 10, 10, 8, 7, 7, 9], MN = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const JUL_DEAL = (DEAL * SHAPE[6]) / 100, JH = bucketHours(2026, 7, []);
+const JUL_ON = Math.round((JUL_DEAL * JH.onPeak) / JH.total), JUL_OFF = JUL_DEAL - JUL_ON;
+const PORT = 10;                                                    // ten similar deals make the portfolio
+const SOLD = [JUL_ON * PORT, JUL_OFF * PORT];
+const OFFH = JH.total - JH.onPeak;
+const BOUGHT = [15 * JH.onPeak, 8 * OFFH];                         // a 15 MW on-peak block and an 8 MW off-peak block
+const NET = SOLD.map((v, i) => ({ sold: v, bought: BOUGHT[i], open: v - BOUGHT[i], pct: Math.round((BOUGHT[i] / v) * 100) }));
 const MOVE = 3, MTM = BOOK[0].open * MOVE;                         // $ change for a $3 curve move on July’s open volume
 
 export default {
@@ -15,8 +25,9 @@ export default {
   legend: [['#7c63d0', 'data'], ['#6f9a3c', 'money']],
   learn: [
     { t: 'What it means to be long or short', at: 0 }, { t: 'What feeds a position report', at: 1 },
-    { t: 'How to read a month-by-month position', at: 2 }, { t: 'How to validate new deals', at: 3 },
-    { t: 'What a daily reconciliation covers', at: 4 }, { t: 'How a position turns into profit and loss', at: 5 },
+    { t: 'How a yearly deal becomes monthly and bucket volumes', at: 2 }, { t: 'How to read a month-by-month position', at: 3 },
+    { t: 'How hedges give the net open position', at: 4 }, { t: 'How to validate new deals', at: 5 },
+    { t: 'What a daily reconciliation covers', at: 6 }, { t: 'How a position turns into profit and loss', at: 7 },
   ],
   build(s) {
     s.floor(10, 10, 'concrete');
@@ -28,15 +39,17 @@ export default {
     s.box('desk', 7.2, 5.8, 0, 1.6, 1.4, 1.0, 'steel', { label: { t: 'trading desk', icon: 'factory' } });
     s.flow('f-s', [[2.2, 1.6, 0.05], [3.6, 3.4, 0.05]], 'ac', {});
     s.flow('f-t', [[2.2, 5.2, 0.05], [3.8, 4.2, 0.05]], 'ac', {});
-    s.flow('f-i', [[7.2, 2.0, 0.05], [4.9, 3.6, 0.05]], 'ac', { from: 4 });
+    s.flow('f-i', [[7.2, 2.0, 0.05], [4.9, 3.6, 0.05]], 'ac', { from: 6 });
     s.flow('f-r', [[4.1, 4.5, 0.05], [4.4, 6.6, 0.05]], 'ac', {});
     s.flow('f-d', [[5.4, 7.2, 0.05], [7.2, 6.4, 0.05]], 'cash', { cls: 'slow' });
     s.card('ls', 'LONG, SHORT OR FLAT', list([['Short', 'sold more than bought: hurt if prices rise'], ['Long', 'bought more than sold: hurt if prices fall'], ['Flat', 'bought what was sold']], { gap: 36 }), { w: 300, h: 150, from: 0, until: 0 });
     s.card('in', 'WHAT FEEDS THE REPORT', list([['Customer sales', 'contract volumes by month and hour'], ['Purchases', 'forwards, futures, ISO buys'], ['Load forecast', 'expected use, not just contracts'], ['Market curve', 'to value what is open']], { gap: 33 }), { w: 300, h: 170, from: 1, until: 1 });
-    s.card('book', 'A POSITION BY MONTH (MWh)', table(['Month', 'Sold', 'Bought', 'Open', 'Hedged'], BOOK.map((r) => [r.m, fmt(r.sold), fmt(r.bought), fmt(r.open), `${r.pct}%`]), { cols: [12, 56, 112, 172, 228], rowH: 26 }), { w: 300, h: 160, from: 2, until: 2 });
-    s.card('chk', 'CHECKS ON NEW DEALS', list([['Counted once', 'no duplicates, none missing'], ['Right dates', 'start, end and delivery month'], ['Right point', 'the correct hub or zone'], ['Right units', 'MW and MWh are not the same']], { gap: 33 }), { w: 300, h: 170, from: 3, until: 3 });
-    s.card('rec', 'THE DAILY RECONCILIATION', list([['Deal system to the report', 'every deal appears once'], ['Report to ISO data', 'actual use against forecast'], ['Invoices to deals', 'what was billed matches'], ['Explain every break', 'write down why numbers differ']], { gap: 33 }), { w: 300, h: 170, from: 4, until: 4 });
-    s.card('pnl', 'VALUE OF JULY’S OPEN VOLUME', bars([{ label: `Curve up $${MOVE}`, value: MTM, v: -MTM, color: '#f1b3a3' }, { label: `Curve down $${MOVE}`, value: MTM, v: MTM, color: '#a6d38b' }], { w: 300, labelW: 100, max: MTM * 1.5, fmt: (v, r) => `${r.v < 0 ? '−' : '+'}$${fmt(Math.abs(r.v))}`, y0: 42, h: 20, gap: 14, note: `${fmt(BOOK[0].open)} MWh short` }), { w: 300, h: 140, from: 5, until: 5 });
+    s.card('book', 'A POSITION BY MONTH (MWh)', table(['Month', 'Sold', 'Bought', 'Open', 'Hedged'], BOOK.map((r) => [r.m, fmt(r.sold), fmt(r.bought), fmt(r.open), `${r.pct}%`]), { cols: [12, 56, 112, 172, 228], rowH: 26 }), { w: 300, h: 160, from: 3, until: 3 });
+    s.card('vol', 'ONE 12,000 MWh DEAL, BY MONTH', cols(SHAPE.map((v, i) => ({ label: MN[i], value: v, color: i === 6 ? '#f6d77e' : '#a6d38b' })), { w: 300, y0: 44, h: 70, max: 12 }) + `<text x="12" y="146" style="font-size:8.5px">July: ${fmt(JUL_DEAL)} MWh = ${fmt(JUL_ON)} on-peak + ${fmt(JUL_OFF)} off-peak</text><text x="12" y="158" style="font-size:8.5px">${JH.onDays} on-peak days × 16 = ${JH.onPeak} of ${JH.total} hours</text>`, { w: 300, h: 166, from: 2, until: 2 });
+    s.card('net', 'JULY NET POSITION BY BLOCK (MWh)', table(['Block', 'Sold', 'Bought', 'Open', 'Hedged'], [['On-peak', fmt(NET[0].sold), fmt(NET[0].bought), fmt(NET[0].open), `${NET[0].pct}%`], ['Off-peak', fmt(NET[1].sold), fmt(NET[1].bought), fmt(NET[1].open), `${NET[1].pct}%`]], { cols: [12, 70, 124, 180, 232], rowH: 26 }) + `<text x="12" y="112" style="font-size:8.5px">bought: 15 MW × ${JH.onPeak} h on-peak, 8 MW × ${OFFH} h off-peak</text><text x="12" y="124" style="font-size:8.5px">off-peak is the under-hedged block</text>`, { w: 300, h: 138, from: 4, until: 4 });
+    s.card('chk', 'CHECKS ON NEW DEALS', list([['Counted once', 'no duplicates, none missing'], ['Right dates', 'start, end and delivery month'], ['Right point', 'the correct hub or zone'], ['Right units', 'MW and MWh are not the same'], ['Drops removed', 'customers who left come out']], { gap: 28 }), { w: 300, h: 178, from: 5, until: 5 });
+    s.card('rec', 'THE DAILY RECONCILIATION', list([['Deal system to the report', 'every deal appears once'], ['Report to ISO data', 'actual use against forecast'], ['Invoices to deals', 'what was billed matches'], ['Explain every break', 'write down why numbers differ']], { gap: 33 }), { w: 300, h: 170, from: 6, until: 6 });
+    s.card('pnl', 'VALUE OF JULY’S OPEN VOLUME', bars([{ label: `Curve up $${MOVE}`, value: MTM, v: -MTM, color: '#f1b3a3' }, { label: `Curve down $${MOVE}`, value: MTM, v: MTM, color: '#a6d38b' }], { w: 300, labelW: 100, max: MTM * 1.5, fmt: (v, r) => `${r.v < 0 ? '−' : '+'}$${fmt(Math.abs(r.v))}`, y0: 42, h: 20, gap: 14, note: `${fmt(BOOK[0].open)} MWh short` }), { w: 300, h: 140, from: 7, until: 7 });
   },
   steps: [
     {
@@ -54,11 +67,25 @@ export default {
       focus: ['sales', 'trades', 'db', 'rep'], flows: ['f-s', 'f-t', 'f-r'],
     },
     {
+      short: 'Volumes', tag: 'METHOD', title: 'From a yearly deal to hourly buckets',
+      body: [`A customer deal is usually written as a yearly volume, such as ${fmt(DEAL)} MWh, but hedges are bought by month and block. Spread the year over months with a load shape: July takes ${SHAPE[6]}%, so ${fmt(JUL_DEAL)} MWh.`,
+        `Then split it by hours. July 2026 has ${JH.onDays} on-peak days, so ${JH.onPeak} of ${JH.total} hours are on-peak. A flat load puts ${fmt(JUL_ON)} MWh on-peak and ${fmt(JUL_OFF)} off-peak.`],
+      callout: { k: 'know', t: 'The shape is an assumption. A customer who runs more at night moves volume from on-peak to off-peak.' },
+      focus: ['sales', 'db', 'rep'], flows: ['f-s', 'f-r'],
+    },
+    {
       short: 'Reading it', tag: 'NUMBERS', title: 'A position by month',
       body: [`In this illustration July has ${fmt(BOOK[0].sold)} MWh sold and ${fmt(BOOK[0].bought)} bought, leaving ${fmt(BOOK[0].open)} MWh open, or ${BOOK[0].pct}% hedged. August is ${BOOK[1].pct}% hedged, September ${BOOK[2].pct}% and October ${BOOK[3].pct}%.`,
         'Months nearer delivery are usually more fully hedged. Months further out are open, and that is intended, since hedges are built in layers.'],
       callout: { k: 'warn', t: 'Compare each month with the desk’s target hedge level, not with a fixed number.' },
       focus: ['rep', 'db'], flows: ['f-r'], stats: { open: `${fmt(BOOK[0].open)} MWh`, pct: `${BOOK[0].pct}%` },
+    },
+    {
+      short: 'Hedges', tag: 'NUMBERS', title: 'Subtract the hedges to see what is open',
+      body: [`Take ten such deals, so July has ${fmt(SOLD[0])} MWh on-peak and ${fmt(SOLD[1])} off-peak sold. A 15 MW on-peak block covers 15 × ${JH.onPeak} = ${fmt(BOUGHT[0])} MWh, leaving ${fmt(NET[0].open)} open, or ${NET[0].pct}% hedged. An 8 MW off-peak block covers 8 × ${OFFH} = ${fmt(BOUGHT[1])} MWh, leaving ${fmt(NET[1].open)} open, or ${NET[1].pct}%.`,
+        'A block hedge is a fixed MW for set hours. Load-following hedges move with usage but cost more. Blocks leave shape risk, because load does not follow a flat block, and volume risk, because usage can differ from the forecast. Long tenors are often under-hedged because volumes are least certain.'],
+      callout: { k: 'warn', t: 'Open volume and percent hedged tell you different things. Check both for each block.' },
+      focus: ['rep', 'trades', 'sales'], flows: ['f-t', 'f-r'],
     },
     {
       short: 'Validate', tag: 'METHOD', title: 'Get every deal in once, correctly',

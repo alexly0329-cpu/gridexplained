@@ -33,7 +33,7 @@ export default {
     s.box('batt', 5.6, 7.2, 0, 1.2, 1.0, 0.8, 'green', { label: { t: 'home battery', icon: 'battery' } });
     s.raw('community', panel(0.6, 4.4, 1.6, 1.3) + panel(2.4, 4.4, 1.6, 1.3) + panel(0.6, 6.0, 1.6, 1.3) + panel(2.4, 6.0, 1.6, 1.3), { from: 3, k: 12 });
     s.label('community:l', 2.0, 5.2, 1.9, { t: 'community solar', icon: 'sun' }, { from: 3 });
-    s.box('agg', 3.6, 8.2, 0, 1.6, 1.2, 1.0, 'white', { from: 4, label: { t: 'aggregator (cloud)', icon: 'layers' } });
+    s.box('agg', 3.6, 8.2, 0, 1.6, 1.2, 1.0, 'white', { from: 4, label: { t: 'aggregator (cloud)', icon: 'layers' }, lopt: { dx: -100, dy: 12 } });
     s.flow('f-in', [[4.0, 2.0, 0.05], [4.0, 5.8, 0.05], [5.8, 5.8, 0.05]], 'ac', {});
     s.flow('f-out', [[5.8, 6.2, 0.05], [4.4, 6.2, 0.05], [4.4, 2.0, 0.05]], 'electric', {});
     s.flow('f-cash', [[4.2, 2.2, 0.05], [4.2, 5.6, 0.05], [5.8, 5.6, 0.05]], 'cash', { cls: 'slow' });

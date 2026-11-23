@@ -22,7 +22,7 @@ const chart = `<path class="ax" d="M24,${CY(0)}H268M24,40V150"/>
   <text x="${CX(12)}" y="${CY(CUM[20]) - 6}" style="font-size:9px;font-weight:700;fill:#2f6b22">${money(CUM[20])}</text>
   <text x="${CX(12)}" y="${CY(CUMD[20]) + 14}" style="font-size:9px;font-weight:700;fill:#a5470f">${money(CUMD[20])} at ${pct(R, 0)}</text>
   <text x="26" y="${CY(-10000) - 4}" style="font-size:8.5px">−$10,000</text>
-  <text x="24" y="166">0</text><text x="${CX(10) - 4}" y="166">10</text><text x="${CX(20) - 12}" y="166">20 yrs</text>
+  <text x="24" y="166">0</text><text x="${CX(10) - 4}" y="166">10</text><text x="${CX(20) - 20}" y="166">20 yrs</text>
   <text x="12" y="182" style="font-size:8.5px"><tspan fill="#6f9a3c" font-weight="700">━</tspan> total   <tspan fill="#d0683a" font-weight="700">┅</tspan> discounted</text>`;
 
 const loanTable = table(['Metric', 'All cash', 'With loan'], [
