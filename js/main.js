@@ -48,6 +48,10 @@ import sqldrills from './lessons/sqldrills.js';
 import auctions from './lessons/auctions.js';
 import regulation from './lessons/regulation.js';
 import fundamentals from './lessons/fundamentals.js';
+import capacity from './lessons/capacity.js';
+import ohio from './lessons/ohio.js';
+import excel from './lessons/excel.js';
+import cases from './lessons/cases.js';
 import sandbox from './lessons/sandbox.js';
 
 // Add a lesson = import it above and list it in SOURCES or GRID_LESSONS.
@@ -58,9 +62,11 @@ const PROJECT_LESSONS = [feasibility, siting, returns, lcoe, financing, build, r
 const SYSTEM_LESSONS = [metrics, loadcurves, loadweather, variable, storage, demand, models]; // from the Renewable Power and Electricity Systems notes
 const TRANSITION_LESSONS = [history, costs, efficiency, enabling, der, spiral, zerocost, access]; // from the Renewable Energy Futures notes
 const TOOL_LESSONS = [windeng, pveng, storagetech, bvp, inverters, sandbox]; // deep dives and an interactive model
-const TRADER_LESSONS = [sqldrills, auctions, regulation, fundamentals]; // add-on track for power-trading roles; every lesson carries track: 'trader'
+const TRADER_LESSONS = [ohio, auctions, capacity, regulation, sqldrills, excel, cases, fundamentals]; // add-on track for power-trading roles; every lesson carries track: 'trader'
 const LESSONS = [...FOUNDATION_LESSONS, ...SOURCES, ...GRID_LESSONS, ...PROJECT_LESSONS, ...SYSTEM_LESSONS, ...TRANSITION_LESSONS, ...TOOL_LESSONS, ...TRADER_LESSONS];
 const BRAND = 'GRID / EXPLAINED';
+const TAB_TITLE = 'Grid Explained';       // browser tab title, the same on every page
+const LANDING = 'solar';                  // lesson shown when the page opens without a #/lesson link
 const GROUPS = [['01', 'Foundations', FOUNDATION_LESSONS], ['02', 'Sources', SOURCES], ['03', 'The grid', GRID_LESSONS], ['04', 'Projects & finance', PROJECT_LESSONS], ['05', 'Electricity systems', SYSTEM_LESSONS], ['06', 'The energy transition', TRANSITION_LESSONS], ['07', 'Deep dives & sandbox', TOOL_LESSONS], ['08', 'Trader desk', TRADER_LESSONS]];
 const SOON = [];
 
@@ -118,12 +124,15 @@ $('#search').onclick = openSearch;
 const link = (l, i) => `<button class="lesson-link ${L && l.id === L.id ? 'cur' : ''}" data-go="${l.id}"><span class="n">${done.has(l.id) ? '✓' : pad(i + 1)}</span><span><span class="t">${l.title}</span><small>${l.tagline}</small></span>${l.track === 'trader' ? '<i class="bd">TRADER</i>' : ''}</button>`;
 // Drawer: one accordion per lesson group, listed one under another.
 const openGroups = new Set();
-let navFilter = store.get('grid-filter', 'all'); // all | core | trader
+let navFilter = store.get('grid-filter', 'core'); // all | core | trader; the menu opens on Core until the reader picks another view
 const showIn = (l) => navFilter === 'all' || (navFilter === 'trader') === (l.track === 'trader');
 function drawNav() {
-  const cur = L && GROUPS.find((g) => g[2].includes(L)); if (cur) openGroups.add(cur[0]); else if (!openGroups.size) openGroups.add(GROUPS[0][0]);
-  const inner = GROUPS.map(([n, name, list]) => [n, name, list, list.filter(showIn)]).filter((g) => g[3].length)
-    .map(([n, name, list, shown]) => `<details class="acc inner" data-g="${n}" ${openGroups.has(n) ? 'open' : ''}><summary><span class="gn">${n}</span><span class="gt">${name}</span><em>${shown.length}</em></summary>${shown.map((l) => link(l, list.indexOf(l))).join('')}</details>`).join('');
+  const groups = GROUPS.map(([n, name, list]) => [n, name, list, list.filter(showIn)]).filter((g) => g[3].length);
+  // Only one group is open at a time: keep the open one if the filter still shows it, else the current lesson's group, else the first.
+  const keep = groups.find((g) => openGroups.has(g[0])), cur = L && groups.find((g) => g[2].includes(L)), pick = keep || cur || groups[0];
+  openGroups.clear(); if (pick) openGroups.add(pick[0]);
+  const inner = groups
+    .map(([n, name, list, shown]) => `<details class="acc inner" data-g="${n}" ${openGroups.has(n) ? 'open' : ''}><summary><span class="gn">${n}</span><span class="gt">${name}</span><em>${shown.length}</em></summary>${shown.map((l, i) => link(l, i)).join('')}</details>`).join('');
   const seg = `<div class="seg" role="group" aria-label="Filter lessons">${[['all', 'All'], ['core', 'Core'], ['trader', 'Trader']].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${navFilter === k}">${t}</button>`).join('')}</div>`;
   $('#drawer').innerHTML = `<div class="brand"><i></i><span>${BRAND}</span></div>${seg}<div class="accs">${inner}</div>`
     + (SOON.length ? `<h4>Coming soon</h4>${SOON.map((t) => `<div class="lesson-link soon"><span class="n">–</span><span><span class="t">${t}</span></span></div>`).join('')}` : '');
@@ -131,7 +140,10 @@ function drawNav() {
 }
 document.addEventListener('toggle', (e) => {
   const d = e.target; if (!d.matches?.('#drawer details.acc')) return;
-  if (d.open) openGroups.add(d.dataset.g); else openGroups.delete(d.dataset.g);
+  if (d.open) { // opening a group closes the others
+    openGroups.clear(); openGroups.add(d.dataset.g);
+    document.querySelectorAll('#drawer details.acc[open]').forEach((x) => { if (x !== d) x.open = false; });
+  } else openGroups.delete(d.dataset.g);
 }, true);
 function results(q) {
   const m = LESSONS.filter((l) => (l.title + l.tagline + (l.steps || []).map((s) => s.title + s.body.join(' ')).join(' ')).toLowerCase().includes(q.toLowerCase()));
@@ -152,17 +164,21 @@ const controls = () => `<div class="ctrls" role="group" aria-label="Playback">
 function mount(l) {
   stopPlay();
   L = l;
+  $('#page').className = l.sandbox ? 'layout' : 'layout fit';   // "fit": on desktop the lesson fills the window height
+  if (l.track === 'trader' && navFilter === 'core') navFilter = 'all';   // a shared link to a Trader lesson opens with it visible in the menu
   const [gn, gname, glist] = GROUPS.find((g) => g[2].includes(l));
+  const vis = glist.filter((x) => showIn(x) || x === l);   // lesson numbers follow the menu filter
+  openGroups.clear(); openGroups.add(gn);                   // the menu opens on the current lesson's group
   if (l.sandbox) { // interactive model: it mounts its own controls instead of steps
-    $('#page').innerHTML = `<section class="card stage-card"><div class="crumb">${gn}. ${gname} <span style="opacity:.5">/</span> <b>Lesson ${glist.indexOf(l) + 1} of ${glist.length}</b></div><div class="titlerow"><h1>${l.title}</h1><span class="chip">${ic('clock')} ${l.time} min</span><span class="chip s">${ic('layers')} interactive</span></div><p class="tagline">${l.tagline}</p><div id="sbx-main"></div></section><aside class="side" id="sbx-side"></aside>`;
-    document.title = `${l.title} — ${BRAND}`; l.mount($('#sbx-main'), $('#sbx-side'));
+    $('#page').innerHTML = `<section class="card stage-card"><div class="crumb">${gn}. ${gname} <span style="opacity:.5">/</span> <b>Lesson ${vis.indexOf(l) + 1} of ${vis.length}</b></div><div class="titlerow"><h1>${l.title}</h1><span class="chip">${ic('clock')} ${l.time} min</span><span class="chip s">${ic('layers')} interactive</span></div><p class="tagline">${l.tagline}</p><div id="sbx-main"></div></section><aside class="side" id="sbx-side"></aside>`;
+    document.title = TAB_TITLE; l.mount($('#sbx-main'), $('#sbx-side'));
     if (!done.has(l.id)) { done.add(l.id); store.set('grid-done', [...done]); }
     drawNav(); return;
   }
   const s = makeScene(); l.build(s);
   $('#page').innerHTML = `
   <section class="card stage-card">
-    <div class="crumb">${gn}. ${gname} <span style="opacity:.5">/</span> <b>Lesson ${glist.indexOf(l) + 1} of ${glist.length}</b></div>
+    <div class="crumb">${gn}. ${gname} <span style="opacity:.5">/</span> <b>Lesson ${vis.indexOf(l) + 1} of ${vis.length}</b></div>
     <div class="titlerow"><h1>${l.title}</h1><span class="chip">${ic('clock')} ${l.time} min</span><span class="chip">${ic('gauge')} ${l.level}</span><span class="chip s">${ic('layers')} ${l.steps.length} steps</span>${l.track === 'trader' ? '<span class="chip t">TRADER</span>' : ''}</div>
     <p class="tagline">${l.tagline}</p>
     <div class="stage">
@@ -181,7 +197,7 @@ function mount(l) {
       <div class="hint"><span><kbd>←</kbd><kbd>→</kbd> step</span><span><kbd>Space</kbd> play / pause</span><span><kbd>R</kbd> replay step</span></div></div>
     <div class="card learn"><h3>Knowledge Check</h3><ul id="learn">${l.learn.map((x) => `<li><i></i>${x.t}</li>`).join('')}</ul></div>
   </aside>`;
-  document.title = `${l.title} — ${BRAND}`;
+  document.title = TAB_TITLE;
   $('#bk').onclick = () => go(step - 1); $('#nx').onclick = next;
   $('#dots').onclick = (e) => { const b = e.target.closest('.dot'); if (b) go(+b.dataset.i); };
   stopPlay(); updatePlayUI();
@@ -219,29 +235,18 @@ function apply() {
   $('#tt').textContent = st.title;
   const c = st.callout;
   $('#bd').innerHTML = st.body.map((p) => `<p>${md(p)}</p>`).join('') + (c ? `<div class="callout ${c.k}"><small>${{ key: 'Key idea', know: 'Good to know', warn: 'Watch out' }[c.k]}</small>${md(c.t)}</div>` : '');
-  $('#bd').scrollTop = 0; fitText();
-  const last = step === L.steps.length - 1, nxt = LESSONS[LESSONS.indexOf(L) + 1];
+  $('#bd').scrollTop = 0;
+  const last = step === L.steps.length - 1, nxt = nextLesson();
   $('#bk').disabled = step === 0;
   $('#nx').disabled = last && !nxt;
   $('#nx').innerHTML = last ? (nxt ? `Next lesson: ${nxt.title.split(' ')[0]} <span>→</span>` : 'You made it <span>✓</span>') : `Next: ${L.steps[step + 1].short} <span>→</span>`;
-  $('#sc').textContent = `${st.short} · ${pad(step + 1)} of ${pad(L.steps.length)}`;
+  $('#sc').textContent = `${pad(step + 1)} of ${pad(L.steps.length)}`;
   document.querySelectorAll('.dot').forEach((d, i) => { d.classList.toggle('done', i < step); d.classList.toggle('cur', i === step); });
   document.querySelectorAll('#learn li').forEach((li, i) => li.classList.toggle('got', step >= L.learn[i].at));
-  $('.learn h3').dataset.n = `${L.learn.filter((x) => step >= x.at).length}/${L.learn.length}`;
   declutter();
   if (playing) schedule(); else setBar(0);
   if (last && !done.has(L.id)) { done.add(L.id); store.set('grid-done', [...done]); drawNav(); }
 }
-// One-screen mode: grow the step text as large as fits (21px down to 14px) so the card never needs a scroll bar.
-const fitText = () => {
-  const bd = $('#bd'); if (!bd) return;
-  bd.style.fontSize = '';
-  const phone = matchMedia('(max-width:1000px) and (min-height:560px)').matches;
-  if (!phone && !matchMedia('(min-width:1001px) and (min-height:540px)').matches) return;
-  let f = phone ? 16 : 21; const min = phone ? 13 : 14; bd.style.fontSize = f + 'px';
-  while (f > min && bd.scrollHeight > bd.clientHeight + 1) bd.style.fontSize = (f -= 0.5) + 'px';
-};
-addEventListener('resize', () => { fitZoom(); fitText(); }); document.fonts?.ready.then(() => { fitZoom(); fitText(); });
 // Push overlapping visible pills apart (the lower one moves down) so labels never stack.
 function declutter() {
   const pills = [...$('#scene').querySelectorAll('.el[data-id$=":l"]:not(.hide):not(.dim) .pill')].map((p) => {
@@ -255,8 +260,10 @@ function declutter() {
   }
   pills.forEach((l) => l.p.setAttribute('transform', `translate(${l.x},${l.ny})`));
 }
+// The next lesson follows the menu filter, so Core readers are not sent into Trader lessons.
+function nextLesson() { const pool = LESSONS.filter((x) => showIn(x) || x === L); return pool[pool.indexOf(L) + 1]; }
 function go(i) { i = Math.max(0, Math.min(L.steps.length - 1, i)); location.hash = `#/${L.id}/${i + 1}`; }
-function next(cross = true) { if (step < L.steps.length - 1) go(step + 1); else if (cross) { const n = LESSONS[LESSONS.indexOf(L) + 1]; if (n) location.hash = `#/${n.id}/1`; } }
+function next(cross = true) { if (step < L.steps.length - 1) go(step + 1); else if (cross) { const n = nextLesson(); if (n) location.hash = `#/${n.id}/1`; } }
 // ---------- playback: Play runs steps 1…n on a timer sized to the step's text ----------
 const DWELL = (st) => 3500 + (st.body.join('').length + (st.callout?.t.length || 0)) * 9;   // ms at 1×
 function setBar(ms) { document.querySelectorAll('.pfill').forEach((f) => { f.style.transition = 'none'; f.style.width = '0'; if (ms) { void f.offsetWidth; f.style.transition = `width ${ms}ms linear`; f.style.width = '100%'; } }); }
@@ -282,13 +289,12 @@ function togglePause() { paused = !paused; $('#scene').classList.toggle('paused'
 
 function route() {
   const m = location.hash.match(/^#\/([a-z]+)\/(\d+)/);
-  const l = (m && LESSONS.find((x) => x.id === m[1])) || L || LESSONS[0];
+  const l = (m && LESSONS.find((x) => x.id === m[1])) || L || LESSONS.find((x) => x.id === LANDING) || LESSONS[0];
   if (l !== L) { mount(l); paused = false; }
   step = l.sandbox ? 0 : Math.max(0, Math.min(l.steps.length - 1, m ? parseInt(m[2], 10) - 1 : 0));
   apply();
 }
 window.addEventListener('hashchange', route);
-document.addEventListener('click', (e) => { const h = e.target.closest('.learn h3'); if (h) h.parentNode.classList.toggle('open'); else if (!e.target.closest('.learn')) $('.learn')?.classList.remove('open'); }); // phone: Knowledge Check sheet
 document.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); return; }
   if (e.key === 'Escape') return closeAll();
