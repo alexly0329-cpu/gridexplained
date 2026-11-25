@@ -1,7 +1,7 @@
 import { house, pylon } from './common.js';
 import { list, table } from './cards.js';
 
-// Trader track. General knowledge of Ohio retail power, not from the course notes. The 10.19¢ price to compare is quoted from the reader's interview game plan and should be checked; the offer price and auction rounds are illustrative.
+// Trader track. General knowledge of Ohio retail power, not from the course notes. The 10.19¢ price to compare is AEP Ohio’s residential figure for Oct 1 to Dec 31, 2026, as published by Ohio rate-comparison sites; verify it at energychoice.ohio.gov; the offer price and auction rounds are illustrative.
 const PTC = 10.19, OFFER = 9.6, USE = 900;                                   // ¢/kWh default price, ¢/kWh supplier offer, kWh a month
 const SAVE = +(((PTC - OFFER) / 100) * USE).toFixed(2);
 const NEED = 10, ROUNDS = [[70, 14], [66, 13], [62, 12], [59, 11], [57, 10]];   // price $/MWh, tranches offered; needs fall to the 10 tranches wanted
@@ -34,7 +34,7 @@ export default {
     s.flow('f-pay', [[7.0, 3.6, 0.05], [2.6, 5.9, 0.05]], 'cash', { from: 1, cls: 'slow' });
     s.flow('f-bid', [[2.6, 6.8, 0.05], [4.0, 7.4, 0.05]], 'ac', { from: 2, until: 3, cls: 'slow' });
     s.card('who', 'WHO SELLS POWER IN OHIO', list([['Utility default (SSO)', 'the standard service offer'], ['Competitive suppliers (CRES)', 'sell fixed or variable offers'], ['Utility wires', 'deliver either way'], ['Customers choose', 'or stay on default']], { gap: 33 }), { w: 300, h: 170, from: 0, until: 0 });
-    s.card('ptc', 'PRICE TO COMPARE (¢/kWh)', table(['', 'Price', ''], [['Utility default', `${PTC}`, 'game plan figure'], ['A supplier offer', `${OFFER}`, 'illustration'], ['Gap', `${(PTC - OFFER).toFixed(2)}`, `$${SAVE} a month`]], { cols: [12, 112, 168], rowH: 26, hl: 2 }), { w: 300, h: 134, from: 1, until: 1 });
+    s.card('ptc', 'PRICE TO COMPARE (¢/kWh)', table(['', 'Price', ''], [['Utility default', `${PTC}`, 'AEP Ohio, Q4 2026'], ['A supplier offer', `${OFFER}`, 'illustration'], ['Gap', `${(PTC - OFFER).toFixed(2)}`, `$${SAVE} a month`]], { cols: [12, 112, 168], rowH: 26, hl: 2 }), { w: 300, h: 134, from: 1, until: 1 });
     s.card('clock', 'A DESCENDING-CLOCK AUCTION', table(['Round', 'Price $/MWh', 'Tranches offered'], ROUNDS.map(([p, t], i) => [`${i + 1}`, `${p}`, `${t}`]), { cols: [12, 70, 174], rowH: 22 }) + `<text x="12" y="${32 + 22 + ROUNDS.length * 22 + 8}" style="font-size:8.5px">${NEED} wanted: clears in round ${ROUNDS.length} at $${CLEAR[0]}</text>`, { w: 300, h: 190, from: 2, until: 2 });
     s.card('tranche', 'A FULL-REQUIREMENTS TRANCHE', list([['A fixed share of the load', 'one slice of all default customers'], ['The winner supplies it all', 'energy, capacity, ancillaries, credits'], ['Paid one price per MWh', 'the clearing price, any volume'], ['Takes volume and weather risk', 'if load runs high, cost rises']], { gap: 33 }), { w: 300, h: 170, from: 3, until: 3 });
     s.card('zones', 'OHIO ZONES AND HUBS', table(['Zone', 'Area'], [['AEP', 'AEP Ohio'], ['DAY', 'Dayton'], ['DEOK', 'Duke Energy Ohio'], ['ATSI', 'FirstEnergy Ohio']], { cols: [12, 74], rowH: 26 }) + `<text x="12" y="${32 + 22 + 4 * 26 + 10}" style="font-size:8.5px">hubs to trade: PJM Western Hub, AEP-Dayton Hub</text>`, { w: 300, h: 184, from: 4, until: 4 });
@@ -50,7 +50,7 @@ export default {
     },
     {
       short: 'Price to compare', tag: 'NUMBERS', title: 'The number every offer is measured against',
-      body: [`The price to compare is the utility’s default price per kWh. Your game plan quotes AEP Ohio’s residential figure at ${PTC}¢ for October 1 to December 31, 2026. Confirm the current number before using it.`,
+      body: [`The price to compare is the utility’s default price per kWh. AEP Ohio’s residential figure is ${PTC}¢ for October 1 to December 31, 2026. It resets each quarter, so confirm the current number at energychoice.ohio.gov before using it.`,
         `A supplier offer of ${OFFER}¢ would be ${(PTC - OFFER).toFixed(2)}¢ lower. At ${USE} kWh a month that is $${SAVE}. Customers look at this first, so a supplier’s margin must live inside the gap.`],
       callout: { k: 'know', t: 'The default price changes with each auction and quarter, so a fixed offer can look good or bad later.' },
       focus: ['homes', 'sup', 'util'], flows: ['f-pay'], stats: { ptc: `${PTC}¢`, save: `$${SAVE}` },

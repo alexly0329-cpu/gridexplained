@@ -1,6 +1,6 @@
 import { list, bars, code } from './cards.js';
 
-// Trader track. The method is general PJM practice; the price level is illustrative. The three auction prices come from the reader's interview game plan and should be checked at PJM before use.
+// Trader track. The method is general PJM practice; the price level is illustrative. The three auction prices are the PJM Base Residual Auction clearing prices for 2026/27, 2027/28 and 2028/29 (2028/29 published July 2026).
 // Capacity cost per MWh = PLC × price × 365 ÷ annual MWh. PJM's zonal scaling and reserve factors raise the obligation slightly and are ignored here.
 const PRICE = 330;                                                    // $/MW-day, illustrative
 const cust = (name, peakMW, lf, plc) => { const mwh = peakMW * 8760 * lf; const cost = plc * PRICE * 365; return { name, plc, lf, mwh, cost, perMWh: cost / mwh }; };
@@ -35,7 +35,7 @@ export default {
     s.card('conv', 'FROM $/MW-DAY TO $/MWh', code([`cost = PLC × price × 365`, `     = ${A.plc} × $${PRICE} × 365 = $${fmt(A.cost)}`, `energy = 1 MW × 8,760 × ${A.lf * 100}% = ${fmt(A.mwh)} MWh`, ``, `$/MWh = ${fmt(A.cost)} ÷ ${fmt(A.mwh)} = $${A.perMWh.toFixed(2)}`, `¢/kWh = $${A.perMWh.toFixed(2)} ÷ 10 = ${(A.perMWh / 10).toFixed(2)}¢`], { y0: 38, gap: 14 }), { w: 300, h: 134, from: 2, until: 2 });
     s.card('lf', 'SAME PEAK, DIFFERENT USE ($/MWh)', bars([A, B].map((c, i) => ({ label: c.name, value: +c.perMWh.toFixed(2), color: ['#f6d77e', '#a6d38b'][i] })), { w: 300, labelW: 108, max: 24, fmt: (v) => `$${v}`, y0: 42, h: 20, gap: 14, note: 'both 1 MW at peak; the charge is spread over more MWh' }), { w: 300, h: 140, from: 3, until: 3 });
     s.card('shave', 'PEAK SHAVING ($/MWh)', bars([A, C].map((c, i) => ({ label: c.name, value: +c.perMWh.toFixed(2), color: ['#f6d77e', '#a6d38b'][i] })), { w: 300, labelW: 120, max: 24, fmt: (v) => `$${v}`, y0: 42, h: 20, gap: 14, note: `share ${A.plc} to ${C.plc} MW saves $${fmt(A.cost - C.cost)} a year` }), { w: 300, h: 140, from: 4, until: 4 });
-    s.card('auc', 'LAST THREE PJM AUCTIONS ($/MW-DAY)', bars(AUCTIONS.map(([label, value], i) => ({ label, value, color: ['#f6d77e', '#f1b3a3', '#cfc0e8'][i] })), { w: 300, labelW: 62, max: 400, fmt: (v) => `$${v}`, y0: 40, h: 20, gap: 14, note: 'from your game plan: check at PJM before quoting' }), { w: 300, h: 160, from: 5, until: 5 });
+    s.card('auc', 'LAST THREE PJM AUCTIONS ($/MW-DAY)', bars(AUCTIONS.map(([label, value], i) => ({ label, value, color: ['#f6d77e', '#f1b3a3', '#cfc0e8'][i] })), { w: 300, labelW: 62, max: 400, fmt: (v) => `$${v}`, y0: 40, h: 20, gap: 14, note: 'PJM BRA results; verify at pjm.com' }), { w: 300, h: 160, from: 5, until: 5 });
   },
   steps: [
     {
@@ -75,7 +75,7 @@ export default {
     },
     {
       short: 'Auctions', tag: 'NUMBERS', title: 'Know the last three clearing prices',
-      body: [`PJM’s auctions for the 2026/27, 2027/28 and 2028/29 delivery years cleared at $${AUCTIONS[0][1]}, $${AUCTIONS[1][1]} and $${AUCTIONS[2][1]} per MW-day. The last two were at the market’s price cap. These figures come from your interview game plan, so confirm them at PJM before quoting them.`,
+      body: [`PJM’s auctions for the 2026/27, 2027/28 and 2028/29 delivery years cleared at $${AUCTIONS[0][1]}, $${AUCTIONS[1][1]} and $${AUCTIONS[2][1]} per MW-day. All three cleared at the price cap that FERC approved for these auctions, so they show the cap, not a market-clearing level. Figures are from PJM’s published Base Residual Auction results; check pjm.com for the latest.`,
         'Part of the pressure comes from forecast demand growth, including data centres, against a tight supply.'],
       callout: { k: 'key', t: 'Quote the three prices and their trend, and be able to convert any of them into $/MWh for a given customer.' },
       focus: ['iso', 'sup'], flows: ['f-iso'],

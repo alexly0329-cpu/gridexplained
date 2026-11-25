@@ -66,7 +66,7 @@ const TRADER_LESSONS = [ohio, auctions, capacity, regulation, sqldrills, excel, 
 const LESSONS = [...FOUNDATION_LESSONS, ...SOURCES, ...GRID_LESSONS, ...PROJECT_LESSONS, ...SYSTEM_LESSONS, ...TRANSITION_LESSONS, ...TOOL_LESSONS, ...TRADER_LESSONS];
 const BRAND = 'GRID / EXPLAINED';
 const TAB_TITLE = 'Grid Explained';       // browser tab title, the same on every page
-const LANDING = 'solar';                  // lesson shown when the page opens without a #/lesson link
+const LANDING = 'wholesale';                  // lesson shown when the page opens without a #/lesson link
 const GROUPS = [['01', 'Foundations', FOUNDATION_LESSONS], ['02', 'Sources', SOURCES], ['03', 'The grid', GRID_LESSONS], ['04', 'Projects & finance', PROJECT_LESSONS], ['05', 'Electricity systems', SYSTEM_LESSONS], ['06', 'The energy transition', TRANSITION_LESSONS], ['07', 'Deep dives & sandbox', TOOL_LESSONS], ['08', 'Trader desk', TRADER_LESSONS]];
 const SOON = [];
 
