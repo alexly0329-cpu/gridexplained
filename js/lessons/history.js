@@ -93,7 +93,7 @@ export default {
     {
       short: 'The gap', tag: 'NUMBERS', title: 'Plans versus the climate target',
       body: ['The IEA’s Stated Policies Scenario assumes governments meet their current plans. Its Sustainable Development Scenario is the path needed for roughly 1.5–2 °C. The second needs about 50% more renewable electricity than the first, and renewables win most new capacity in both.',
-        'The US EIA, assuming no new policy, sees coal fall from 24% to 13% of US electricity and nuclear from 19% to 12% by 2050, with solar becoming nearly half of renewable generation.'],
+        'EIA’s 2026 outlook sees coal fall from about 16% of US electricity in 2025 to between under 1% and 5% by 2050 depending on the case, and nuclear from 17% to 12–15%, while wind, solar and gas together rise from about 60% to around 80%.'],
       callout: { k: 'know', t: 'Every major study agrees on direction: wind and solar grow hugely. The difference is whether it is enough, and whether storage, EVs and green hydrogen scale with it.' },
       focus: ['ren'], vars: mv(4), stats: { co2: '34 Gt', gap: '≈ +50%' },
     },

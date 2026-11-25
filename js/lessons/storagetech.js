@@ -70,7 +70,7 @@ export default {
     },
     {
       short: 'Batteries', tag: 'CONCEPT', title: 'Batteries are getting cheap fast',
-      body: ['Installed battery costs fell from over $1,500 per kWh to under $200, about 18% a year, and yearly capacity added rose from near zero in 2014 to over 160 GWh in 2024.',
+      body: ['Installed battery costs fell from over $1,500 per kWh to under $200, about 18% a year, and yearly capacity added rose from near zero in 2014 to over 160 GWh in 2024 and about 300 GWh in 2025 (BloombergNEF).',
         'Lithium-ion leads on efficiency and compactness but needs battery management to avoid fire. Sodium-sulfur runs molten at 325 °C and suits 8-hour shifts. Vanadium flow cells keep liquid in tanks and last 15,000+ cycles.'],
       callout: { k: 'know', t: 'Flow batteries let you buy power and energy separately: bigger tanks mean longer duration without more stacks.' },
       focus: ['batt', 'hub'], flows: ['f-batt'],

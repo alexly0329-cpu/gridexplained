@@ -135,6 +135,7 @@ function drawNav() {
     .map(([n, name, list, shown]) => `<details class="acc inner" data-g="${n}" ${openGroups.has(n) ? 'open' : ''}><summary><span class="gn">${n}</span><span class="gt">${name}</span><em>${shown.length}</em></summary>${shown.map((l, i) => link(l, i)).join('')}</details>`).join('');
   const seg = `<div class="seg" role="group" aria-label="Filter lessons">${[['all', 'All'], ['core', 'Core'], ['trader', 'Trader']].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${navFilter === k}">${t}</button>`).join('')}</div>`;
   $('#drawer').innerHTML = `<div class="brand"><i></i><span>${BRAND}</span></div>${seg}<div class="accs">${inner}</div>`
+    + `<p class="disclaimer">Educational material, not trading or investment advice. Many figures are illustrative or come from 2019–2020 sources; check dates and primary sources before relying on any number.</p>`
     + (SOON.length ? `<h4>Coming soon</h4>${SOON.map((t) => `<div class="lesson-link soon"><span class="n">–</span><span><span class="t">${t}</span></span></div>`).join('')}` : '');
   $('#drawer .seg').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; navFilter = b.dataset.f; store.set('grid-filter', navFilter); drawNav(); };
 }

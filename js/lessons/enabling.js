@@ -61,7 +61,7 @@ export default {
     },
     {
       short: 'EV load', tag: 'NUMBERS', title: 'The EV problem is the peak',
-      body: ['Forecasts take the global EV fleet from about 8 million in 2019 to over 600 million by 2050 on current plans, and over a billion for climate stabilisation.',
+      body: ['Forecasts made around 2019 took the global EV fleet from about 8 million to over 600 million by 2050 on current plans, and over a billion for climate stabilisation. By the end of 2025 the fleet was already near 80 million, per IEA data.',
         'Electrifying all light vehicles adds only about 10–40% to annual electricity use. The risk is timing: if everyone plugs in at 6–7 p.m. as solar fades, peak demand rises by 9–20%.'],
       callout: { k: 'warn', t: 'Total energy is manageable. Instantaneous power at the evening peak is what strains the grid.' },
       focus: ['ev', 'home'], flows: ['f-ev', 'f-grid'], stats: { ev: '600 M – 1 B', peak: '+9% to +20%' },
